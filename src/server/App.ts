@@ -1,13 +1,17 @@
 import Koa from 'koa';
-import Router from 'koa-router';
+import KoaRouter, { IRouterContext } from 'koa-router';
+import { ApolloServer } from 'apollo-server-koa';
+import { resolvers } from './Resolvers';
+import { typeDefs } from './Schema';
 
-const router = new Router();
-router.get('/', async (ctx: any) => ctx.status = 401);
-router.post('/graphql', async (ctx: any) => ctx.body = 'GraphQL');
-router.get('/graphiql', async (ctx: any) => ctx.body = 'GraphiQL');
+const router = new KoaRouter();
+router.get('/healthcheck', (ctx: IRouterContext) => ctx.body = 'OK');
 
 const app = new Koa();
-app.use(router.routes())
+app.use(router.routes());
+
+const gqlServer = new ApolloServer({typeDefs, resolvers});
+app.use(gqlServer.getMiddleware());
 
 export function App() {
   app.listen(3000);
